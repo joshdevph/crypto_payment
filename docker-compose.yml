@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - backend-db:///./sql_app.db  # Fixed volume mount for SQLite
+    environment:
+      - DATABASE_URL=sqlite:///./sql_app.db  # Absolute path in container
+      - PYTHONPATH=/app
+      - CORS_ORIGINS=http://frontend:3000,http://localhost:3000  # Fixed port (3000, not 3001)
+      - DEBUG=True
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:  # Explicitly attach to network
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app:delegated
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8000  # Correct for Docker-internal communication
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    command: npm run dev
+    depends_on:  # Wait for backend to be healthy
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+volumes:
+  backend-db:  # SQLite database volume
+
+networks:  # Define a custom network
+  app-network:
+    driver: bridge

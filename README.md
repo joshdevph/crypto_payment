@@ -8,6 +8,7 @@ A simulation of a crypto checkout backend with webhook support, built with FastA
 - POST `/api/webhook` - Handles payment status updates
 - SQLite database for transaction storage
 - Simple Next.js frontend for demonstration
+- ChatGPT integration with an interactive `/chat` page
 
 ## Getting Started
 
@@ -39,6 +40,7 @@ A simulation of a crypto checkout backend with webhook support, built with FastA
 1. Navigate to `frontend/`
 2. Install dependencies: `npm install`
 3. Run the development server: `npm run dev`
+4. Set the `OPENAI_API_KEY` environment variable to enable the chat page
 
 
 #### Things to Improve
